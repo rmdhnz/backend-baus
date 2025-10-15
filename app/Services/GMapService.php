@@ -1,4 +1,5 @@
 <?php 
+
 namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
@@ -9,7 +10,7 @@ class GMapService
 
     public function __construct()
     {
-        $this->key = config('services.google_maps.key');
+        $this->key = config('services.gmaps.key');
     }
 
     public function getDistanceInMeters($fromLat, $fromLng, $toLat, $toLng): ?float

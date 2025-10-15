@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Driver;
+use App\Models\Staff_IM;
 
 class User extends Authenticatable
 {
@@ -51,5 +52,8 @@ class User extends Authenticatable
 
     public function driver (): HasOne{
         return $this->hasOne(Driver::class);
+    }
+    public function staff_im (): HasOne{
+        return $this->hasOne(Staff_IM::class);
     }
 }

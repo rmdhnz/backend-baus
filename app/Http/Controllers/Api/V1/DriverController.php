@@ -17,7 +17,6 @@ class DriverController extends Controller
     public function index (){
         $data = $this->driverSrv->getAllDrivers();
         return response()->json($data);
-        // return $data["data"];
     }
     public function getDriverByStatus($status)
     {
@@ -27,5 +26,43 @@ class DriverController extends Controller
         }
         $data = Driver::where('status', $status)->get();
         return response()->json($data);
-    }   
+    }
+    public function getDriverById ($id){
+        $data = Driver::find($id);
+        if(!$data) { 
+            return response()->json([
+                "success" => false,
+                "data" => "Not Found"
+            ]);
+        }
+        return response()->json([
+            "success" => true,
+            "data" => $data
+        ]);
+    }  
+    public function updateStatusDriver(Request $request)
+    {
+        $validated = $request->validate([
+            'id' => 'required|integer|exists:drivers,user_id',
+            'status' => 'required|in:OFF,JALAN,STAY',
+        ]);
+
+        $driver = Driver::where('user_id', $validated['id'])->first();
+
+        if (!$driver) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Driver tidak ditemukan',
+            ], 404);
+        }
+
+        $driver->status = $validated['status'];
+        $driver->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Berhasil mengubah status driver',
+        ]);
+    }
+
 }
