@@ -54,6 +54,7 @@ class UserDriverSeeder extends Seeder
                 'late_frequency'      => 0,
                 'avg_remaining_time'  => null,
                 'avg_latest'          => null,
+                "status"              => fake()->randomElement(["OFF","STAY","JALAN"])
             ]);
         }
 

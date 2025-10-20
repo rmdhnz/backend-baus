@@ -1,0 +1,53 @@
+services:
+  # === Laravel App ===
+  app:
+    build:
+      context: .
+      dockerfile: docker/apache/Dockerfile
+    container_name: baus_app
+    restart: unless-stopped
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "8080:80"
+    depends_on:
+      - postgredb
+    networks:
+      - baus_network
+
+  # === PostgreSQL ===
+  postgredb:
+    image: postgres:15
+    container_name: baus_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - baus_network
+
+  # === (Opsional) pgAdmin ===
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: baus_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@baus.local
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8081:80"
+    depends_on:
+      - postgredb
+    networks:
+      - baus_network
+
+networks:
+  baus_network:
+
+volumes:
+  pgdata:
