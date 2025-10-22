@@ -41,4 +41,21 @@ class AuthController extends Controller
             ]
         ],200)->withCookie($cookie);
     }
+
+    // GET Profile
+    public function getProfile (Request $request){
+        $user  = $request->user()->load('role');
+
+        return response()->json([
+            "success" => true,
+            "message" => "User Profile",
+            "data" => [
+                "user" => $user->name,
+                "username" =>  $user->username,
+                "email" => $user->email,
+                "active_status" => $user->active_status,
+                "role" => $user->role->name,
+            ]
+        ],200);
+    }
 }
