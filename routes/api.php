@@ -5,10 +5,19 @@ use App\Http\Controllers\Api\V1\OrderMappingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\MapperController;
 use App\Http\Controllers\Api\V1\AllocationController;
+use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\StaffIMController;
 
 
 Route::prefix('v1')->group(function () {
+    Route::prefix('auth')->group(function () {
+
+        // ✅ middleware auth:sanctum diterapkan dengan benar
+        Route::get('/profile', [AuthController::class, 'getProfile'])
+            ->middleware('auth:sanctum');
+
+        Route::post('/login', [AuthController::class, 'login']);
+    });
     Route::prefix('drivers')->group(function () {
         // GET /api/v1/drivers
         Route::get('/', [DriverController::class, 'index']);
