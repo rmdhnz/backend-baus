@@ -9,11 +9,14 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use App\Models\Driver;
 use App\Models\Staff_IM;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Laravel\Sanctum\HasApiTokens;
+
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -24,7 +27,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        "phone"
+        "phone",
+        "active_status"
     ];
 
     /**
@@ -55,5 +59,8 @@ class User extends Authenticatable
     }
     public function staff_im (): HasOne{
         return $this->hasOne(Staff_IM::class);
+    }
+    public function role(): BelongsTo{
+        return $this->belongsTo(\App\Models\Role::class);
     }
 }

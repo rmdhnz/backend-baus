@@ -36,6 +36,11 @@ class UserDriverSeeder extends Seeder
                 $username = $baseUsername . $suffix++;
             }
 
+            $existingUser = User::where('phone', $driver['phone_number'] ?? null)->first();
+            if ($existingUser) {
+                continue; // Skip jika user dengan nomor telepon sudah ada
+            }
+
             $user = User::create([
                 'name'      => $driver['name'] ?? 'Unknown',
                 'username'  => $username,

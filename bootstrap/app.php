@@ -12,7 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__."/../routes/api.php",
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        $middleware->alias([
+            'ensure.supervisor', \App\Http\Middleware\EnsureSupervisor::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

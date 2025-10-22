@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\User;
 class Staff_IM extends Model
 {
+    protected $table = "staff_ims";
     protected $fillable = ["user_id","shift_id","productivity_score","total_transaction","on_time_frequency","late_frequency","avg_remaining_time","avg_latest"];
 
     protected $primaryKey = "user_id";
