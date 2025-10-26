@@ -12,9 +12,14 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__."/../routes/api.php",
     )
     ->withMiddleware(function (Middleware $middleware) {
+        $middleware->group('api', [
+            \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        ]);
         $middleware->alias([
             'ensure.supervisor' => \App\Http\Middleware\EnsureSupervisor::class,
-            'auth.sanctum' => \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
+            'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'api.key' => \App\Http\Middleware\CheckApiKey::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

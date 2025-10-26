@@ -32,6 +32,7 @@ class DriverOrderSeeder extends Seeder
                 'receipt_link'     => null,
                 'notes'            => null,
                 'payment_type_id'  => 1, // testing doang
+                'status'          => 'PENDING',
             ]);
         }
 

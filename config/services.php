@@ -36,6 +36,9 @@ return [
     ],
     "gmaps" => [
         "key" => env("GOOGLE_MAPS_API_KEY","")
+    ],
+    "internal_api" => [
+        "key" => env("BAUS_API_KEY",""),
     ]
 
 ];

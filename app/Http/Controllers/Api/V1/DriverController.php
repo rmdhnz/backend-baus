@@ -103,9 +103,21 @@ class DriverController extends Controller
         ], 201);
     }
 
-    // GET Profile
-
-    public function getProfile (){
-
+    // GET ALL MY ORDERS
+    public function getAllOrders (Request $request){
+        $user = $request->user();
+        if(!$user){
+            return response()->json([
+                "success" => false,
+                "message" => "User not found",
+                "data" => [],
+            ],404);
+        }
+        $orders = $user->driver->orders;
+        return response()->json([
+            "success" => true,
+            "message" => "List of all orders for driver ".$user->name,
+            "data" => $orders
+        ]);
     }
 }
