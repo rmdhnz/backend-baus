@@ -46,19 +46,18 @@ class DriverController extends Controller
     public function updateStatusDriver(Request $request)
     {
         $validated = $request->validate([
-            'id' => 'required|integer|exists:drivers,user_id',
             'status' => 'required|in:OFF,JALAN,STAY',
         ]);
+        $user = $request->user();
+        // ambil dan update data user 
+        $driver = Driver::where('user_id', $user->id)->first();
 
-        $driver = Driver::where('user_id', $validated['id'])->first();
-
-        if (!$driver) {
+        if(!$driver) { 
             return response()->json([
-                'success' => false,
-                'message' => 'Driver tidak ditemukan',
-            ], 404);
+                "success" => false,
+                "message" => "Driver not found",
+            ],404);
         }
-
         $driver->status = $validated['status'];
         $driver->save();
 
@@ -119,5 +118,11 @@ class DriverController extends Controller
             "message" => "List of all orders for driver ".$user->name,
             "data" => $orders
         ]);
+    }
+
+    // GET Driver Shift Status
+
+    public function getDriverShiftStatus (Request $request){
+        
     }
 }
