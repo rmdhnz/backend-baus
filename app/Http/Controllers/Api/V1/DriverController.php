@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Services\DriverService;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Order;
 class DriverController extends Controller
 {
     private $driverSrv;
@@ -102,27 +103,69 @@ class DriverController extends Controller
         ], 201);
     }
 
-    // GET ALL MY ORDERS
-    public function getAllOrders (Request $request){
+    // GET Driver Shift Status
+    public function getDriverShiftStatus (Request $request){
+
+    }
+
+    // GET ALL Driver ORDERS
+    public function getAllDriverOrders (Request $request){
         $user = $request->user();
-        if(!$user){
+        $driver = Driver::with('orders')->where('user_id',$user->id)->first();
+        if(!$driver){
             return response()->json([
                 "success" => false,
                 "message" => "User not found",
                 "data" => [],
             ],404);
         }
-        $orders = $user->driver->orders;
+        $orders = $driver->orders()->orderBy("delivery_id","desc")->orderBy("created_at","asc")->get();
         return response()->json([
             "success" => true,
-            "message" => "List of all orders for driver ".$user->name,
-            "data" => $orders
+            "message" => "All Orders for Driver ".$user->name,
+            "data" => $orders,
         ]);
     }
 
-    // GET Driver Shift Status
+    // Get Driver Order detail
+    public function getOrderDetail(Request $request)
+    {
+        $user = $request->user();
 
-    public function getDriverShiftStatus (Request $request){
-        
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized',
+            ], 401);
+        }
+
+        $orderId = $request->input('order_id');
+
+        if (!$orderId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'order_id is required',
+            ], 400);
+        }
+
+        $order = Order::where('driver_id', $user->id)
+            ->where(function ($q) use ($orderId) {
+                $q->where('order_id', $orderId);
+            })
+            ->first();
+
+        if (!$order) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Order not found or not assigned to this driver',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Order detail retrieved successfully.',
+            'data' => $order,
+        ]);
     }
+
 }

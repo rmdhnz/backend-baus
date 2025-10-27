@@ -113,7 +113,7 @@ class AuthController extends Controller
             "success" => true,
             "message" => "User Profile",
             "data" => [
-                "user" => $user->name,
+                "name" => $user->name,
                 "username" =>  $user->username,
                 "email" => $user->email,
                 "active_status" => $user->active_status,

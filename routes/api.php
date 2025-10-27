@@ -24,16 +24,19 @@ Route::prefix('v1')->group(function () {
     });
     //ENDPOINT /api/v1/drivers
     Route::prefix('drivers')->group(function () {
-        Route::get('/', [DriverController::class, 'index'])->middleware('api.key');
         Route::get('/status/{status}', [DriverController::class, 'getDriverByStatus'])->middleware('api.key');
+        Route::get('/orders',[DriverController::class,'getAllDriverOrders'])->middleware(['auth:sanctum','role:2']);
+        Route::get('/order-detail',[DriverController::class,'getOrderDetail'])->middleware(['auth:sanctum','role:2']);
+        Route::put('/update/status',[DriverController::class,'updateStatusDriver'])->middleware(['auth:sanctum','role:2']);
+        Route::get('/', [DriverController::class, 'index'])->middleware('api.key');
         Route::get('/{id}',[DriverController::class,'getDriverById'])->middleware('api.key');
-        Route::put('/update/status',[DriverController::class,'updateStatusDriver'])->middleware('auth:sanctum');
     });
 
     //ENDPOINT /api/v1/staff-im
     Route::prefix("staff-im")->group(function(){
         Route::get("/",[StaffIMController::class,'index']);
     });
+
     Route::post('/order/mapping',[OrderMappingController::class,'handle']);
     Route::post('/mapper', [MapperController::class, 'ingest']);
     
