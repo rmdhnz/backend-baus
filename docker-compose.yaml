@@ -9,7 +9,7 @@ services:
     volumes:
       - .:/var/www/html
     ports:
-      - "8080:80"
+      - "8088:80"
     depends_on:
       - postgredb
     environment:
@@ -35,7 +35,7 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5434:5432"
     networks:
       - baus_network
 
@@ -51,7 +51,7 @@ services:
       PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "False"
       PGADMIN_CONFIG_CONSOLE_LOG_LEVEL: "10"
     ports:
-      - "8081:80"
+      - "8089:80"
     depends_on:
       - postgredb
     networks:
