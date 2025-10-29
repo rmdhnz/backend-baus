@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Services\DriverService;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use App\Models\Order;
 class DriverController extends Controller
 {
@@ -207,6 +208,43 @@ class DriverController extends Controller
             'success' => true,
             'message' => 'Order detail retrieved successfully.',
             'data' => $order,
+        ]);
+    }
+
+    // PUT Pending Order
+    public function pendingOrder (Request $request){
+        $user = $request->user();
+        $orderId = $request->input('order_id');
+        $order = Order::where('driver_id', $user->id)
+            ->where(function ($q) use ($orderId) {
+                $q->where('order_id', $orderId);
+            })
+            ->first();
+        if(!$order) { 
+            return response()->json([
+                "success" => false,
+                "message" => "Order Id Not Found"
+            ],404);
+        }
+        $validator = Validator::make($request->all(),[
+            'reason' => 'required|string',
+        ]);
+        if($validator->fails()){
+            return response()->json([
+                "success" => false,
+                "message" => "Validation failed",
+                "errors" => $validator->errors()
+            ],422);
+        }
+        $order->update([
+            "reason" => $request->input('reason'),
+            "status" => "PENDING",
+            "updated_at" => now(),
+        ]);
+
+        return response()->json([
+            "success" => true,
+            "message" => "Successfully pending order Id " . $orderId,
         ]);
     }
 }

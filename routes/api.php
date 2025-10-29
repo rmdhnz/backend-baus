@@ -32,6 +32,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('drivers')->group(function () {
         Route::get('/shift-status',[DriverController::class,'getDriverShiftStatus'])->middleware('auth:sanctum');
         Route::get('/orders',[DriverController::class,'getAllDriverOrders'])->middleware(['auth:sanctum','role:2']);
+        Route::put('/order/update-status',[DriverController::class,'pendingOrder'])->middleware(['auth:sanctum','role:2']);
         Route::get('/status/{status}', [DriverController::class, 'getDriverByStatus'])->middleware('api.key');
         Route::get('/order-detail',[DriverController::class,'getOrderDetail'])->middleware(['auth:sanctum','role:2']);
         Route::put('/update/status',[DriverController::class,'updateStatusDriver'])->middleware(['auth:sanctum','role:2']);
