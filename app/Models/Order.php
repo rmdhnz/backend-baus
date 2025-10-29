@@ -14,7 +14,7 @@ class Order extends Model
     protected $fillable = [
     'order_no', 'order_id', 'cust_name', 'delivery_lat', 'delivery_lon',
     'subtotal', 'shipping_fee', 'discount_amount', 'distance_km',
-    'receipt_link', 'notes', 'payment_type_id'
+    'receipt_link', 'notes', 'payment_type_id',"driver_id"
 ];
 
     public function drivers (): BelongsTo{

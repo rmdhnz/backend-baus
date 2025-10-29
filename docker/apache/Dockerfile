@@ -28,3 +28,5 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 
 EXPOSE 80
 CMD ["apache2-foreground"]
+RUN apt-get update && apt-get install -y cron
+CMD service cron start && apache2-foreground

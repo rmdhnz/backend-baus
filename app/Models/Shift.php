@@ -4,11 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\User;
+use App\Models\Driver;
 class Shift extends Model
 {
     protected $guarded = "id";
-    public function users (): HasMany{
-        return $this->hasMany(User::class);
+    public function drivers (): HasMany{
+        return $this->hasMany(Driver::class,'shift_id','id');
     }
 }

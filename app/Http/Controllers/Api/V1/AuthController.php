@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 // use App\Models\Role;
 use Laravel\Sanctum\PersonalAccessToken;
-use Exception;
+// use Exception;
+use Illuminate\Support\Facades\Validator;
 
 
 class AuthController extends Controller
@@ -144,4 +145,81 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
+    // PUT Update My Profile
+    public function updateMyProfile(Request $request)
+    {
+        $user = $request->user();
+
+        // Validasi input
+        $validator = Validator::make($request->all(), [
+            'name' => 'sometimes|required|string|max:100',
+            'username' => 'sometimes|required|string|max:50|unique:users,username,' . $user->id,
+            'email' => 'sometimes|required|email|unique:users,email,' . $user->id,
+            'phone' => 'sometimes|required|string|max:20|unique:users,phone,' . $user->id,
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => "Validation failed",
+                "errors" => $validator->errors()
+            ], 422);
+        }
+
+        $user->update($request->only(['name', 'username', 'email', 'phone']));
+
+        return response()->json([
+            "success" => true,
+            "message" => "Profile updated successfully",
+            "data" => $user
+        ]);
+    }
+
+    // PUT Update my password
+    public function updateMyPassword(Request $request)
+    {
+        $user = $request->user();
+
+        $validator = Validator::make($request->all(), [
+            'old_password' => 'required|string',
+            'new_password' => [
+                'required',
+                'string',
+                'min:5',
+                'regex:/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).+$/'
+            ],
+        ], [
+            'new_password.min' => 'Password must be at least 5 characters long.',
+            'new_password.regex' => 'Password must contain at least one letter, one number, and one special character.',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                "success" => false,
+                "message" => "Validation failed",
+                "errors" => $validator->errors(),
+            ], 422);
+        }
+
+        $validated = $validator->validated();
+
+        if (!Hash::check($validated['old_password'], $user->password)) {
+            return response()->json([
+                "success" => false,
+                "message" => "Old password is incorrect.",
+            ], 401);
+        }
+
+        // Update password baru (dihash)
+        $user->update([
+            'password' => Hash::make($validated['new_password']),
+        ]);
+
+        return response()->json([
+            "success" => true,
+            "message" => "Password updated successfully.",
+        ]);
+    }
+
 }

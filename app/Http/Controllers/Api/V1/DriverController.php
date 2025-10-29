@@ -29,7 +29,11 @@ class DriverController extends Controller
             return response()->json(['error' => 'Status tidak valid'], 400);
         }
         $data = Driver::with('user')->where('status', $status)->get();
-        return response()->json($data);
+        return response()->json([
+            "success" => true,
+            "total" => count($data),
+            "data" => $data
+        ]);
     }
     public function getDriverById ($id){
         $data = Driver::with('user')->find($id);
@@ -105,7 +109,44 @@ class DriverController extends Controller
 
     // GET Driver Shift Status
     public function getDriverShiftStatus (Request $request){
+        $user = $request->user();
+        $driver = Driver::with('shift')->where('user_id',$user->id)->first();
+        if(!$driver) { 
+            return response()->json([
+                "success" => false,
+                "message" => "Driver not Found",
+                "data" => [],
+            ],404);
+        }
+        $shift = $driver->shift;
+        if (!$shift) {
+            return response()->json([
+                "success" => false,
+                "message" => "Shift not assigned",
+                "data" => []
+            ], 404);
+        }
+        $now =  now()->format('H:i:s');
+        $start = \Carbon\Carbon::createFromFormat('H:i:s', $shift->start_time);
+        $end = \Carbon\Carbon::createFromFormat('H:i:s', $shift->end_time);
+        $current = \Carbon\Carbon::createFromFormat('H:i:s', $now);
 
+        if ($end->lessThan($start)) {
+            $inShift = $current->greaterThanOrEqualTo($start) || $current->lessThanOrEqualTo($end);
+        } else {
+            $inShift = $current->between($start, $end);
+        }
+
+        return response()->json([
+            "success" => true,
+            "message" => "Shift Data Retrieved Successfully",
+            "data" => [
+                "shift" => $shift->name,
+                "start_time" => $shift->start_time,
+                "end_time" => $shift->end_time,
+                "in_shift" => $inShift
+            ]
+        ]);
     }
 
     // GET ALL Driver ORDERS
@@ -123,6 +164,7 @@ class DriverController extends Controller
         return response()->json([
             "success" => true,
             "message" => "All Orders for Driver ".$user->name,
+            "total" => count($orders),
             "data" => $orders,
         ]);
     }
@@ -167,5 +209,4 @@ class DriverController extends Controller
             'data' => $order,
         ]);
     }
-
 }

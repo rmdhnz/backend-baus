@@ -22,7 +22,7 @@ class DriverOrderSeeder extends Seeder
                 'order_no'         => 'OL' . Str::upper(Str::random(8)),
                 'order_id'         => now()->format('YmdHis') . rand(10, 99), 
                 'cust_name'        => 'Customer ' . $i,
-                'driver_id'        => fake()->randomElement([1,2,3,4]),
+                // 'driver_id'        => fake()->randomElement([1,2,3,4]),
                 'delivery_lat'     => -6.2 + mt_rand(-1000, 1000) / 10000,
                 'delivery_lon'     => 106.8 + mt_rand(-1000, 1000) / 10000,
                 'subtotal'         => rand(30000, 100000),

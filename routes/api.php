@@ -17,15 +17,22 @@ Route::prefix('v1')->group(function () {
     });
     // ENDPOINT /api/v1/auth
     Route::prefix('auth')->group(function () {
-        Route::get('/profile', [AuthController::class, 'getProfile'])->middleware('auth:sanctum');
-        Route::post('/login', [AuthController::class, 'login']);
-        Route::post('/register', [AuthController::class, 'register']);
-        Route::post('/logout',[AuthController::class,'logout'])->middleware('auth:sanctum');
+        Route::middleware('guest')->group(function(){
+            Route::post('/login', [AuthController::class, 'login']);
+            Route::post('/register', [AuthController::class, 'register']);
+        });
+        Route::middleware('auth:sanctum')->group(function(){
+            Route::get('/profile', [AuthController::class, 'getProfile']);
+            Route::post('/logout',[AuthController::class,'logout']);
+            Route::put('/update-my-profile',[AuthController::class,'updateMyProfile']);
+            Route::put('/update-my-password',[AuthController::class,'updateMyPassword']);
+        });
     });
     //ENDPOINT /api/v1/drivers
     Route::prefix('drivers')->group(function () {
-        Route::get('/status/{status}', [DriverController::class, 'getDriverByStatus'])->middleware('api.key');
+        Route::get('/shift-status',[DriverController::class,'getDriverShiftStatus'])->middleware('auth:sanctum');
         Route::get('/orders',[DriverController::class,'getAllDriverOrders'])->middleware(['auth:sanctum','role:2']);
+        Route::get('/status/{status}', [DriverController::class, 'getDriverByStatus'])->middleware('api.key');
         Route::get('/order-detail',[DriverController::class,'getOrderDetail'])->middleware(['auth:sanctum','role:2']);
         Route::put('/update/status',[DriverController::class,'updateStatusDriver'])->middleware(['auth:sanctum','role:2']);
         Route::get('/', [DriverController::class, 'index'])->middleware('api.key');
