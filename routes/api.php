@@ -31,15 +31,20 @@ Route::prefix('v1')->group(function () {
     });
     //ENDPOINT /api/v1/drivers
     Route::prefix('drivers')->group(function () {
-        Route::get('/shift-status',[DriverController::class,'getDriverShiftStatus'])->middleware('auth:sanctum');
-        Route::get('/my-gudang-position',[DriverController::class,'getMyGudangPosition'])->middleware('auth:sanctum');
-        Route::get('/orders',[DriverController::class,'getAllDriverOrders'])->middleware(['auth:sanctum','role:2']);
-        Route::put('/order/update-status',[DriverController::class,'pendingOrder'])->middleware(['auth:sanctum','role:2']);
-        Route::get('/status/{status}', [DriverController::class, 'getDriverByStatus'])->middleware('api.key');
-        Route::get('/order-detail',[DriverController::class,'getOrderDetail'])->middleware(['auth:sanctum','role:2']);
-        Route::put('/update/status',[DriverController::class,'updateStatusDriver'])->middleware(['auth:sanctum','role:2']);
-        Route::get('/', [DriverController::class, 'index'])->middleware('api.key');
-        Route::get('/{id}',[DriverController::class,'getDriverById'])->middleware('api.key');
+        Route::middleware('auth:sanctum')->group(function(){
+            Route::get('/shift-status',[DriverController::class,'getDriverShiftStatus']);
+            Route::get('/my-gudang-position',[DriverController::class,'getMyGudangPosition']);
+            Route::get('/orders',[DriverController::class,'getAllDriverOrders'])->middleware('role:2');
+            Route::put('/order/update-status',[DriverController::class,'pendingOrder'])->middleware('role:2');
+            Route::get('/order-detail',[DriverController::class,'getOrderDetail'])->middleware('role:2');
+            Route::put('/update/status',[DriverController::class,'updateStatusDriver'])->middleware('role:2');
+        });
+        Route::middleware('api.key')->group(function(){
+            Route::get('/all-driver-in-shift',[DriverController::class,'getDriversInShift']);
+            Route::get('/status/{status}', [DriverController::class, 'getDriverByStatus']);
+            Route::get('/', [DriverController::class, 'index']);
+            Route::get('/{id}',[DriverController::class,'getDriverById']);
+        });
     });
 
     //ENDPOINT /api/v1/staff-im

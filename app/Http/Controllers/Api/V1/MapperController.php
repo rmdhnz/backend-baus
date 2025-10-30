@@ -56,7 +56,7 @@ class MapperController extends Controller
 
         // Simpan pesanan ke database
         try {
-                Log::info('Payload diterima:', $validate);
+                // Log::info('Payload diterima:', $validate);
             DB::beginTransaction();
 
             $order = Order::create([

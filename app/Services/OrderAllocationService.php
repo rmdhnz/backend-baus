@@ -7,14 +7,16 @@ use App\Models\Driver;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Services\GMapService;
-
+use App\Services\DriverService;
 class OrderAllocationService
 {
     protected GMapService $gmap;
+    protected $driverSvc;
 
-    public function __construct(GMapService $gmap)
+    public function __construct(GMapService $gmap,DriverService $driverSvc)
     {
         $this->gmap = $gmap;
+        $this->driverSvc = $driverSvc;
     }
 
     public function allocateOrdersToDrivers(): void
@@ -22,24 +24,28 @@ class OrderAllocationService
         Log::info('🚀 [OrderAllocationService] Mulai proses alokasi pesanan...');
 
         DB::transaction(function () {
+            // Ambil order yang belum punya driver dan masih PENDING (order_status_id = 2)
             $orders = Order::whereNull('driver_id')
-                ->where('status', 'PENDING')
+                ->where('order_status_id', 2)
                 ->with('delivery')
                 ->get();
 
-            $drivers = Driver::where('status', 'STAY')->get();
+            // Ambil driver yang STAY
+            // $drivers = Driver::where('status', 'STAY')->get();
+            $drivers = collect($this->driverSvc->getDriverInShift());
+
 
             if ($orders->isEmpty() || $drivers->isEmpty()) {
-                Log::warning('Tidak ada order atau driver STAY.');
+                Log::warning('⚠️ Tidak ada order (status_id=2) atau driver STAY.');
                 return;
             }
 
             $maxOrdersPerDriver = 4;
             $maxExpressPerDriver = 2;
-            $maxDistance = 15000; // meter
+            $maxDistance = 1500; // meter sesuai aturan jarak antar order
             $assignedCount = 0;
 
-            // Urutkan order, prioritaskan EX dan I terlebih dahulu
+            // Urutkan order: EX/I lebih dulu
             $sortedOrders = $orders->sortByDesc(function ($o) {
                 return in_array($o->delivery->alias, ['EX', 'I']) ? 1 : 0;
             });
@@ -64,7 +70,7 @@ class OrderAllocationService
                         continue;
                     }
 
-                    // === Cek jarak dengan chain 300m antar order ===
+                    // === Cek jarak dengan chain <= 300m antar order ===
                     $canAssign = true;
                     if (!empty($driverOrders)) {
                         $lastOrder = end($driverOrders);
@@ -76,7 +82,7 @@ class OrderAllocationService
                             $order->delivery_lon
                         );
 
-                        Log::info("📏 [Driver {$driver->user_id}] jarak {$lastOrder['order_no']} → {$order->order_no}: {$distance} m");
+                        Log::info("📏 [Driver {$driver['user_id']}] jarak {$lastOrder['order_no']} → {$order['order_no']}: {$distance} m");
 
                         if ($distance === null || $distance > $maxDistance) {
                             $canAssign = false;
@@ -84,9 +90,10 @@ class OrderAllocationService
                     }
 
                     if ($canAssign) {
+                        // Update order: assign ke driver, ubah status ke 4 (ASSIGNED)
                         $order->update([
-                            'driver_id' => $driver->user_id,
-                            'status' => 'ASSIGNED',
+                            'driver_id' => $driver['user_id'],
+                            'order_status_id' => 4,
                         ]);
 
                         $driverOrders[] = [
@@ -97,14 +104,15 @@ class OrderAllocationService
                         ];
 
                         $assignedCount++;
-                        Log::info("✅ Order {$order->order_no} ({$order->delivery->alias}) → driver {$driver->user_id}");
+                        Log::info("✅ Order {$order->order_no} ({$order->delivery->alias}) → driver {$driver['user_id']}");
                     }
                 }
 
-                Log::info("👷 Driver {$driver->user_id} total dapat " . count($driverOrders) . " pesanan.");
+                Log::info("👷 Driver {$driver['user_id']} total dapat " . count($driverOrders) . " pesanan.");
             }
 
             Log::info("🎯 Total order berhasil dialokasikan: {$assignedCount}");
         });
     }
+
 }

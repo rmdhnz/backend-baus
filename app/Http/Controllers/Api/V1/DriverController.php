@@ -272,4 +272,15 @@ class DriverController extends Controller
             ]
         ]);
     }
+
+    // GET Driver in shift
+    public function getDriversInShift (){
+        $driverInShift = $this->driverSrv->getDriverInShift();
+
+        return response()->json([
+            "success" => true,
+            "count" => count($driverInShift),
+            "data" => $driverInShift,
+        ]);
+    }
 }
