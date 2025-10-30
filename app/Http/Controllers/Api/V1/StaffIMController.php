@@ -7,6 +7,10 @@ use App\Models\Staff_IM;
 class StaffIMController extends Controller { 
   public function index (){
     $data = Staff_IM::with('user')->get();
-    return response()->json($data);
+    return response()->json([
+      "success" => true,
+      "total" => count($data),
+      "data" => $data,
+    ]);
   }
 }
