@@ -66,4 +66,7 @@ class User extends Authenticatable
     public function role(): BelongsTo{
         return $this->belongsTo(\App\Models\Role::class);
     }
+    public function outlet ():BelongsTo{
+        return $this->belongsTo(\App\Models\Outlet::class);
+    }
 }
