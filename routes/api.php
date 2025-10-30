@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\MapperController;
 use App\Http\Controllers\Api\V1\AllocationController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\StaffIMController;
 use App\Http\Controllers\Api\V1\SupervisorController;
 
@@ -43,7 +44,12 @@ Route::prefix('v1')->group(function () {
 
     //ENDPOINT /api/v1/staff-im
     Route::prefix("staff-im")->group(function(){
-        Route::get("/",[StaffIMController::class,'index']);
+        Route::get("/",[StaffIMController::class,'index'])->middleware('api.key');
+    });
+
+    // ENDPOINT /api/v1/payments
+    Route::prefix("payments")->group(function(){
+        Route::get('/',[PaymentController::class,'index'])->middleware('api.key');
     });
 
     Route::post('/order/mapping',[OrderMappingController::class,'handle']);
