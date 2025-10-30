@@ -92,8 +92,7 @@ class OrderAllocationService
                     if ($canAssign) {
                         // Update order: assign ke driver, ubah status ke 4 (ASSIGNED)
                         $order->update([
-                            'driver_id' => $driver['user_id'],
-                            'order_status_id' => 4,
+                            'driver_id' => $driver,
                         ]);
 
                         $driverOrders[] = [
