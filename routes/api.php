@@ -39,6 +39,7 @@ Route::prefix('v1')->group(function () {
             Route::post('/order/cancel',[DriverController::class,'cancelledOrder'])->middleware('role:2');
             Route::post('/order/pending',[DriverController::class,'pendingOrder'])->middleware('role:2');
             Route::put('/order/update-status',[DriverController::class,'pendingOrder'])->middleware('role:2');
+            Route::get('/order/history',[DriverController::class,'getOrderHistory'])->middleware('role:2');
             Route::get('/order-detail',[DriverController::class,'getOrderDetail'])->middleware('role:2');
             Route::put('/update/status',[DriverController::class,'updateStatusDriver'])->middleware('role:2');
         });
