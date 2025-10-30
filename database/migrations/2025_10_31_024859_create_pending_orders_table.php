@@ -18,6 +18,11 @@ return new class extends Migration
             $table->string("olsera_order_no");
             $table->string("reason");
             $table->timestamps();
+
+            $table->index('order_id','pending_orders,order_id_index');
+            $table->index('olsera_order_id','pending_olera_order_id');
+            $table->index('olsera_order_no','pending_olera_order_no');
+
         });
     }
 

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Driver;
+use App\Models\Order;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
@@ -75,5 +76,28 @@ class DriverService
             }
         }
         return $driverInShift;
+    }
+
+    public function getAllOrders ($user){
+        $driver = Driver::with('orders')->where('user_id',$user->id)->first();
+        if(!$driver) { 
+            return response()->json([
+                "success" => false,
+                "message" => "User Not Found",
+                "data" => [],
+            ],404);
+        }
+
+        $orders = $driver->orders()->orderBy("delivery_id","desc")->orderBy("created_at","asc")->get();
+        return $orders;
+    }
+
+    public function getOrderDetail ($user,$orderId){
+        $order = Order::where('driver_id', $user->id)
+            ->where(function ($q) use ($orderId) {
+                $q->where('order_id', $orderId);
+            })
+            ->first();
+        return $order;
     }
 }

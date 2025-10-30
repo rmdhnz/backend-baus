@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\CancelledOrder;
 use App\Models\Driver;
 use Illuminate\Http\Request;
 use App\Services\DriverService;
@@ -10,6 +11,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Order;
+use Illuminate\Support\Facades\DB;
 class DriverController extends Controller
 {
     private $driverSrv;
@@ -153,15 +155,7 @@ class DriverController extends Controller
     // GET ALL Driver ORDERS
     public function getAllDriverOrders (Request $request){
         $user = $request->user();
-        $driver = Driver::with('orders')->where('user_id',$user->id)->first();
-        if(!$driver){
-            return response()->json([
-                "success" => false,
-                "message" => "User not found",
-                "data" => [],
-            ],404);
-        }
-        $orders = $driver->orders()->orderBy("delivery_id","desc")->orderBy("created_at","asc")->get();
+        $orders = $this->driverSrv->getAllOrders($user);
         return response()->json([
             "success" => true,
             "message" => "All Orders for Driver ".$user->name,
@@ -191,11 +185,7 @@ class DriverController extends Controller
             ], 400);
         }
 
-        $order = Order::where('driver_id', $user->id)
-            ->where(function ($q) use ($orderId) {
-                $q->where('order_id', $orderId);
-            })
-            ->first();
+        $order = $this->driverSrv->getOrderDetail($user,$orderId);
 
         if (!$order) {
             return response()->json([
@@ -282,5 +272,49 @@ class DriverController extends Controller
             "count" => count($driverInShift),
             "data" => $driverInShift,
         ]);
+    }
+
+    public function cancelledOrder (Request $request){
+        $user = $request->user();
+        $validated = $request->validate([
+            "order_id" => "required",
+            "reason" => "string|required"
+        ]);
+
+        try { 
+            DB::beginTransaction();
+
+            $order = Order::where('order_id', $validated['order_id'])
+                ->where('driver_id', $user->id)
+                ->first();
+            if(!$order) { 
+                return response()->json([
+                    "success" => false,
+                    "message" => "Order Not Found"
+                ],404);
+            }
+            $order->update([
+                "order_status_id" => 7,
+            ]);
+            CancelledOrder::create([
+                "order_id" => $order->id,
+                "olsera_order_id" => $order->order_id,
+                'olsera_order_no' => $order->order_no,
+                'reason' => $validated['reason'],
+            ]);
+            DB::commit();
+
+            return response()->json([
+                "success" => true,
+                "message" => "Successfully cancelled fucking order",
+                "status" => "CANCELLED",
+            ]);
+        }catch(\Throwable $e) { 
+            DB::rollBack();
+            return response()->json([
+                "success" => false,
+                "message" => "Something went wrong : " . $e->getMessage(),
+            ],500);
+        }
     }
 }
