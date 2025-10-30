@@ -226,8 +226,11 @@ class DriverController extends Controller
                 "message" => "Order Id Not Found"
             ],404);
         }
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'reason' => 'required|string',
+            'status' => 'required|string|in:CANCELLED,PENDING,COMPLETED',
+        ], [
+            'status.in' => 'Status must be one of: CANCELLED, PENDING, or COMPLETED.',
         ]);
         if($validator->fails()){
             return response()->json([
@@ -238,13 +241,35 @@ class DriverController extends Controller
         }
         $order->update([
             "reason" => $request->input('reason'),
-            "status" => "PENDING",
+            "status" => $request->input(''),
             "updated_at" => now(),
         ]);
 
         return response()->json([
             "success" => true,
             "message" => "Successfully pending order Id " . $orderId,
+        ]);
+    }
+
+    // GET My Gudang Position
+    public function getMyGudangPosition (Request $request){
+        $user = $request->user();
+        $driver = User::with('outlet')->find($user->id);
+
+        if(!$driver) { 
+            return response()->json([
+                "success" => false,
+                "message" => "driver not found",
+                "data" => [],
+            ],404);
+        }
+
+        return response()->json([
+            "success" => true,
+            "data" => [
+                "lat" => $driver->outlet->latitude,
+                "lon" => $driver->outlet->longitude,
+            ]
         ]);
     }
 }
