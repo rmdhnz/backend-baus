@@ -26,13 +26,12 @@ class OrderAllocationService
         DB::transaction(function () {
             // Ambil order yang belum punya driver dan masih PENDING (order_status_id = 2)
             $orders = Order::whereNull('driver_id')
-                ->where('order_status_id', 2)
                 ->with('delivery')
                 ->get();
 
             // Ambil driver yang STAY
-            // $drivers = Driver::where('status', 'STAY')->get();
-            $drivers = collect($this->driverSvc->getDriverInShift());
+            $drivers = Driver::where('status', 'STAY')->get();
+            // $drivers = collect($this->driverSvc->getDriverInShift());
 
 
             if ($orders->isEmpty() || $drivers->isEmpty()) {
@@ -92,7 +91,7 @@ class OrderAllocationService
                     if ($canAssign) {
                         // Update order: assign ke driver, ubah status ke 4 (ASSIGNED)
                         $order->update([
-                            'driver_id' => $driver,
+                            'driver_id' => $driver['user_id']
                         ]);
 
                         $driverOrders[] = [

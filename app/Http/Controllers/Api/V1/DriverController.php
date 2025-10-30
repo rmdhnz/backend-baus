@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Order;
+use App\Models\PendingOrder;
 use Illuminate\Support\Facades\DB;
 class DriverController extends Controller
 {
@@ -201,45 +202,6 @@ class DriverController extends Controller
         ]);
     }
 
-    // PUT Pending Order
-    public function pendingOrder (Request $request){
-        $user = $request->user();
-        $orderId = $request->input('order_id');
-        $order = Order::where('driver_id', $user->id)
-            ->where(function ($q) use ($orderId) {
-                $q->where('order_id', $orderId);
-            })
-            ->first();
-        if(!$order) { 
-            return response()->json([
-                "success" => false,
-                "message" => "Order Id Not Found"
-            ],404);
-        }
-        $validator = Validator::make($request->all(), [
-            'reason' => 'required|string',
-            'status' => 'required|string|in:CANCELLED,PENDING,COMPLETED',
-        ], [
-            'status.in' => 'Status must be one of: CANCELLED, PENDING, or COMPLETED.',
-        ]);
-        if($validator->fails()){
-            return response()->json([
-                "success" => false,
-                "message" => "Validation failed",
-                "errors" => $validator->errors()
-            ],422);
-        }
-        $order->update([
-            "reason" => $request->input('reason'),
-            "status" => $request->input(''),
-            "updated_at" => now(),
-        ]);
-
-        return response()->json([
-            "success" => true,
-            "message" => "Successfully pending order Id " . $orderId,
-        ]);
-    }
 
     // GET My Gudang Position
     public function getMyGudangPosition (Request $request){
@@ -308,6 +270,50 @@ class DriverController extends Controller
                 "success" => true,
                 "message" => "Successfully cancelled fucking order",
                 "status" => "CANCELLED",
+            ]);
+        }catch(\Throwable $e) { 
+            DB::rollBack();
+            return response()->json([
+                "success" => false,
+                "message" => "Something went wrong : " . $e->getMessage(),
+            ],500);
+        }
+    }
+    public function pendingOrder (Request $request){
+        $user = $request->user();
+        $validated = $request->validate([
+            "order_id" => "required",
+            "reason" => "string|required",
+        ]);
+
+        try { 
+            DB::beginTransaction();
+
+            $order = Order::where('order_id', $validated['order_id'])
+                ->where('driver_id', $user->id)
+                ->first();
+            if(!$order) { 
+                return response()->json([
+                    "success" => false,
+                    "message" => "Order Not Found"
+                ],404);
+            }
+            $order->update([
+                "order_status_id" =>6,
+                "driver_id" => null,
+            ]);
+            PendingOrder::create([
+                "order_id" => $order->id,
+                "olsera_order_id" => $order->order_id,
+                'olsera_order_no' => $order->order_no,
+                'reason' => $validated['reason'],
+            ]);
+            DB::commit();
+
+            return response()->json([
+                "success" => true,
+                "message" => "Successfully pending fucking order",
+                "status" => "pending",
             ]);
         }catch(\Throwable $e) { 
             DB::rollBack();
