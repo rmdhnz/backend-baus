@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Models\Outlet;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -24,6 +25,7 @@ class AuthController extends Controller
             'name' => ['required', 'string', 'max:100'],
             'phone' => ['required', 'string', 'max:20', 'unique:users,phone'],
             'role_id' => ['required', Rule::exists('roles', 'id')],
+            'outlet_id' => ['required',Outlet::exists('outlets','id')],
             'password' => ['required', 'string', 'min:6'],
             'device_id' => ['required', 'string', 'max:100'],
         ]);
@@ -41,6 +43,7 @@ class AuthController extends Controller
             "name" => $validated['name'],
             "phone" => $validated['phone'],
             "role_id" => $validated['role_id'],
+            "outlet_id" => $validated['outlet_id'],
             "password" => Hash::make($validated['password']),
             "active_status" => false,
             "device_id" => $validated['device_id'],
