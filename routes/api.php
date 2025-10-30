@@ -45,7 +45,12 @@ Route::prefix('v1')->group(function () {
     //ENDPOINT /api/v1/staff-im
     Route::prefix("staff-im")->group(function(){
         Route::get("/",[StaffIMController::class,'index'])->middleware('api.key');
+        Route::get('/staff-in-shift',[StaffIMController::class,'getStaffInShift'])->middleware('api.key');
+        Route::middleware('auth:sanctum')->group(function(){
+            Route::get('/order-in-packing',[StaffIMController::class,'getActiveOrderPacking'])->middleware('role:3');
+        });
     });
+    Route::post('/allocate-order-to-staff-im',[MapperController::class,"allocateOrderToStaffIM"])->middleware('api.key');
 
     // ENDPOINT /api/v1/payments
     Route::prefix("payments")->group(function(){
