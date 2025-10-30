@@ -24,4 +24,7 @@ class Driver extends Model
     public function shift (): BelongsTo{
         return $this->belongsTo(Shift::class,'shift_id','id');
     }
+    // public function outlet (): BelongsTo{
+        // return $this->belongsTo(\App\Models\Outlet::class,'')
+    // }
 }
