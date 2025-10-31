@@ -17,6 +17,7 @@ Route::prefix('v1')->group(function () {
     Route::prefix('supervisor')->middleware(['role:1','auth:sanctum'])->group(function(){
         Route::get('/all-users',[SupervisorController::class,'getAllUser']);
         Route::put('/activate-user',[SupervisorController::class,'activateUser']);
+        Route::get('/in-active-users',[SupervisorController::class,'getInActiveUsers']);
     });
     // ENDPOINT /api/v1/auth
     Route::prefix('auth')->group(function () {

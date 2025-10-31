@@ -14,6 +14,7 @@ class SupervisorController extends Controller
         return response()->json([
             "success" => true,
             "message" => "List of all users",
+            "total" => count($users),
             "data" => $users
         ]);
     }
@@ -43,5 +44,15 @@ class SupervisorController extends Controller
                 "active_status" => $user->active_status,
             ]
         ],200); 
+    }
+
+    // Get All User In-Active
+    public function getInActiveUsers (){
+        $users = User::with('role')->where('active_status',false)->get();
+        return response()->json([
+            "success" => true,
+            "total" => count($users),
+            "data" => $users,
+        ]);
     }
 }
