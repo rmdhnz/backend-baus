@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Staff_IM;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Services\StaffIMService;
 
 class StaffIMController extends Controller
@@ -86,4 +87,64 @@ class StaffIMController extends Controller
             "status" => "Delivered"
         ]);
     }
+
+    public function getOrderHistory(Request $request)
+    {
+        $user = $request->user();
+
+        // Validasi body request (tidak wajib)
+        $validated = $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+        ]);
+
+        $startDate = $validated['start_date'] ?? null;
+        $endDate = $validated['end_date'] ?? null;
+
+        // Query dasar: semua order milik staff ini
+        $query = Order::with(['delivery', 'order_status'])
+            ->where('staff_im_id', $user->id);
+
+        // Terapkan filter tanggal sesuai kondisi
+        if ($startDate && $endDate) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        } elseif ($startDate && !$endDate) {
+            $query->whereDate('created_at', '>=', $startDate);
+        } elseif (!$startDate && $endDate) {
+            $query->whereDate('created_at', '<=', $endDate);
+        }
+
+        // Ambil hasil (urut terbaru)
+        $orders = $query->orderBy('created_at', 'desc')->get();
+
+        if ($orders->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Tidak ada riwayat pesanan ditemukan untuk staff ini.',
+                'data' => [],
+            ]);
+        }
+
+        // Format data output
+        $data = $orders->map(function ($order) {
+            return [
+                'order_no' => $order->order_no,
+                'cust_name' => $order->cust_name,
+                'subtotal' => $order->subtotal,
+                'shipping_fee' => $order->shipping_fee,
+                'delivery_type' => $order->delivery->alias ?? null,
+                'order_status' => $order->orderStatus->name ?? null,
+                'created_at' => $order->created_at->format('Y-m-d H:i:s'),
+                'arrived_time_delivered' => $order->arrived_time_delivered?->format('Y-m-d H:i:s'),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Riwayat pesanan staff berhasil diambil.',
+            'count' => $data->count(),
+            'data' => $data,
+        ]);
+    }
+
 }
