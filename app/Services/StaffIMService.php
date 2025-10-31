@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Order;
 use App\Models\Staff_IM;
 use Carbon\Carbon;
 
@@ -43,5 +44,27 @@ class StaffIMService
             }
         }
         return $staffInShift;
+    }
+
+    public function getAllOrders ($user){
+        $staffIM = Staff_IM::with('orders')->where('user_id',$user->id)->first();
+
+        if(!$staffIM) { 
+            return response()->json([
+                "success" => false,
+                "message" => "User Not Found cok",
+            ],404);
+        }
+
+        $orders = $staffIM->orders()->orderBy("delivery_id","desc")->orderBy("created_at","asc")->get();
+        return $orders;
+    }
+    public function getOrderDetail ($user,$orderId){
+        $order = Order::where('staff_im_id', $user->id)
+            ->where(function ($q) use ($orderId) {
+                $q->where('order_id', $orderId);
+            })
+            ->first();
+        return $order;
     }
 }

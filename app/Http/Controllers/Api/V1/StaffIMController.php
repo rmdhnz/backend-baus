@@ -54,4 +54,36 @@ class StaffIMController extends Controller
             "data" => $activeOrders,
         ]);
     }
+
+
+
+    public function confirmPacking (Request $request){
+        $validated = $request->validate([
+            "order_id" => 'required',
+            'photo' => 'required|image|mimes:jpeg,png,jpg|max:5120'
+        ]);
+        $user = $request->user();
+        $user->load('staff_im');   
+        $order = Order::where('order_id',$validated['order_id'])->where('staff_im_id',$user->id)->first();
+        if(!$order) { 
+            return response()->json([
+                "success" => false,
+                "message" => "Order not found njir",
+            ],404);
+        }
+        $photoPath = $request->file('photo')->store('orders/proof','public');
+        $order->update([
+            'order_status_id' => 5,
+            "proof_image_staff_im" => $photoPath,
+            'arrived_time_delivered' => now(),
+        ]);
+        $order->update([
+            "order_status_id" => 2,
+        ]);
+        return response()->json([
+            "success" => true,
+            "message" => "Successfully pack the shit",
+            "status" => "Delivered"
+        ]);
+    }
 }

@@ -386,7 +386,7 @@ class DriverController extends Controller
     // PUT Complete Order
     public function completeOrder (Request $request){
         $validated = $request->validate([
-            'order_id' => 'required|integer|exists:orders,id',
+            'order_id' => 'required|integer',
             'photo' => 'required|image|mimes:jpeg,png,jpg|max:5120', // max 5MB
         ]);
         $user = $request->user();
@@ -400,8 +400,8 @@ class DriverController extends Controller
         }
         $photoPath = $request->file('photo')->store('orders/proof','public');
         $order->update([
-            'order_staus_id' => 5,
-            "proof_image" => $photoPath,
+            'order_status_id' => 5,
+            "proof_image_driver" => $photoPath,
             'arrived_time_delivered' => now(),
         ]);
 

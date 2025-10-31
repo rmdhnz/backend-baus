@@ -59,6 +59,7 @@ Route::prefix('v1')->group(function () {
         Route::get('/staff-in-shift',[StaffIMController::class,'getStaffInShift'])->middleware('api.key');
         Route::middleware('auth:sanctum')->group(function(){
             Route::get('/order-in-packing',[StaffIMController::class,'getActiveOrderPacking'])->middleware('role:3');
+            Route::put('/order/confirm',[StaffIMController::class,'confirmPacking'])->middleware('role:3');
         });
     });
     Route::post('/allocate-order-to-staff-im',[MapperController::class,"allocateOrderToStaffIM"])->middleware('api.key');
