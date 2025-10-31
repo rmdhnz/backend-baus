@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\MapperController;
 use App\Http\Controllers\Api\V1\AllocationController;
 use App\Http\Controllers\Api\V1\AuthController;
+use App\Http\Controllers\Api\V1\OrderController;
 use App\Http\Controllers\Api\V1\OutletController;
 use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\StaffIMController;
@@ -37,6 +38,7 @@ Route::prefix('v1')->group(function () {
             Route::get('/my-gudang-position',[DriverController::class,'getMyGudangPosition']);
             Route::get('/orders',[DriverController::class,'getAllDriverOrders'])->middleware('role:2');
             Route::post('/order/cancel',[DriverController::class,'cancelledOrder'])->middleware('role:2');
+            Route::post('/order/complete',[DriverController::class,'completeOrder'])->middleware('role:2');
             Route::post('/order/pending',[DriverController::class,'pendingOrder'])->middleware('role:2');
             Route::put('/order/update-status',[DriverController::class,'pendingOrder'])->middleware('role:2');
             Route::get('/order/history',[DriverController::class,'getOrderHistory'])->middleware('role:2');
@@ -64,6 +66,12 @@ Route::prefix('v1')->group(function () {
     // ENDPOINT /api/v1/payments
     Route::prefix("payments")->group(function(){
         Route::get('/',[PaymentController::class,'index'])->middleware('api.key');
+    });
+
+    // ENDPOINT /api/v1/orders
+    Route::prefix('/orders')->group(function(){
+        Route::get('/',[OrderController::class,'index'])->middleware('api.key');
+        Route::get('/cancelled',[OrderController::class,'getCancelledOrders'])->middleware('api.key');
     });
 
     Route::prefix("outlets")->group(function(){

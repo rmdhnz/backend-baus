@@ -30,8 +30,8 @@ class OrderAllocationService
                 ->get();
 
             // Ambil driver yang STAY
-            $drivers = Driver::where('status', 'STAY')->get();
-            // $drivers = collect($this->driverSvc->getDriverInShift());
+            // $drivers = Driver::where('status', 'STAY')->get();
+            $drivers = collect($this->driverSvc->getDriverInShift());
 
 
             if ($orders->isEmpty() || $drivers->isEmpty()) {

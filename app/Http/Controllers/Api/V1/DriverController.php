@@ -382,4 +382,33 @@ class DriverController extends Controller
             'data' => $data,
         ]);
     }
+
+    // PUT Complete Order
+    public function completeOrder (Request $request){
+        $validated = $request->validate([
+            'order_id' => 'required|integer|exists:orders,id',
+            'photo' => 'required|image|mimes:jpeg,png,jpg|max:5120', // max 5MB
+        ]);
+        $user = $request->user();
+        $user->load('driver');
+        $order = Order::where('order_id',$validated['order_id'])->where('driver_id',$user->id)->first();
+        if(!$order) { 
+            return response()->json([
+                "success" => false,
+                "message" => "Order not found njir",
+            ],404);
+        }
+        $photoPath = $request->file('photo')->store('orders/proof','public');
+        $order->update([
+            'order_staus_id' => 5,
+            "proof_image" => $photoPath,
+            'arrived_time_delivered' => now(),
+        ]);
+
+        return response()->json([
+            "success" => true,
+            "message" => "Successfully completed Order " . $order->order_id,
+            "status" => "Delivered"
+        ]); 
+    }
 }

@@ -48,6 +48,7 @@ class UserDriverSeeder extends Seeder
                 'phone'     => $driver['phone_number'] ?? null,
                 'password'  => Hash::make('anjay123'),
                 'role_id'   => 2, // role driver
+                'outlet_id' => 1,
             ]);
 
             Driver::create([
@@ -59,7 +60,7 @@ class UserDriverSeeder extends Seeder
                 'late_frequency'      => 0,
                 'avg_remaining_time'  => null,
                 'avg_latest'          => null,
-                "status"              => fake()->randomElement(["OFF","STAY","JALAN"])
+                "driver_condition_id"              => fake()->randomElement([1,2,3])
             ]);
         }
 

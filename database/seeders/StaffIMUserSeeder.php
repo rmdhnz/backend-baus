@@ -27,6 +27,7 @@ class StaffIMUserSeeder extends Seeder
                 'phone' => '08123456'.str_pad($i, 4, '0', STR_PAD_LEFT),
                 'password' => Hash::make('anjay123'),
                 'role_id' => 3, // role staff IM
+                'outlet_id' => 1,
             ]);
 
             Staff_IM::create([

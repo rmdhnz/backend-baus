@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Models\Driver;
 use App\Models\Delivery;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Order extends Model
 {
@@ -30,5 +31,12 @@ class Order extends Model
     }
     public function order_status ():BelongsTo{
         return  $this->belongsTo(\App\Models\OrderStatus::class,'order_status_id','id');
+    }
+
+    public function cancel ():HasOne{
+        return $this->hasOne(\App\Models\CancelledOrder::class);
+    }
+    public function pending ():HasOne{
+        return $this->hasOne(\App\Models\PendingOrder::class);
     }
 }
